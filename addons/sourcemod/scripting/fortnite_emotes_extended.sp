@@ -75,9 +75,7 @@ public Plugin myinfo =
 };
 
 public void OnPluginStart()
-{	
-	IsAllowCheck = false; // prevent plugins refresh
-
+{
 	LoadTranslations("common.phrases");
 	LoadTranslations("fnemotes.phrases");
 	
@@ -388,7 +386,19 @@ void Event_Start(Event event, const char[] name, bool dontBroadcast)
 	{
 		float freezetime = float(GetConVarInt(FindConVar("mp_freezetime")));
 		if(freezetime == 0.0)
+		{
+			for (int i = 1; i <= MaxClients; i++)
+			if (IsValidClient(i, false) && g_bClientDancing[i]) {
+			
+				StopEmote(i);
+				g_bClientDancing[i] = false;
+				
+			}
+			
+			g_bAllowDance = false;
 			return;
+		}
+		
 		CreateTimer(freezetime,RestartCooldown,_,TIMER_FLAG_NO_MAPCHANGE);
 	}
 }
@@ -398,13 +408,14 @@ public Action RestartCooldown(Handle timer)
 	g_bAllowDance = false;
 	for (int i = 1; i <= MaxClients; i++)
 	if (IsValidClient(i, false) && g_bClientDancing[i]) {
-		ResetCam(i);
-		//StopEmote(client);
-		WeaponUnblock(i);
+	
+		StopEmote(i);
 		g_bClientDancing[i] = false;
+		
 	}
 	
 }
+
 void Event_End(Event event, const char[] name, bool dontBroadcast)
 {
 	g_bAllowDance = true;

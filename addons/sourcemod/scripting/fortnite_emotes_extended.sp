@@ -51,6 +51,7 @@ bool g_bClientDancing[MAXPLAYERS+1];
 
 Handle CooldownTimers[MAXPLAYERS+1];
 bool g_bEmoteCooldown[MAXPLAYERS+1];
+bool g_bAllowDance;
 
 int g_iWeaponHandEnt[MAXPLAYERS+1];
 
@@ -86,9 +87,10 @@ public void OnPluginStart()
 	RegAdminCmd("sm_setdance", Command_Admin_Emotes, ADMFLAG_GENERIC, "[SM] Usage: sm_setemotes <#userid|name> [Emote ID]");
 
 	HookEvent("player_death", 	Event_PlayerDeath, 	EventHookMode_Pre);
-
+	
 	HookEvent("player_hurt", 	Event_PlayerHurt, 	EventHookMode_Pre);
 	
+	HookEvent("round_end",  Event_End);
 	HookEvent("round_prestart",  Event_Start);
 	
 	/**
@@ -160,6 +162,7 @@ int Native_IsClientEmoting(Handle plugin, int numParams)
 
 public void OnMapStart()
 {
+	g_bAllowDance = true;
 	AddFileToDownloadsTable("models/player/custom_player/kodua/fortnite_emotes_v2.mdl");
 	AddFileToDownloadsTable("models/player/custom_player/kodua/fortnite_emotes_v2.vvd");
 	AddFileToDownloadsTable("models/player/custom_player/kodua/fortnite_emotes_v2.dx90.vtx");
@@ -356,6 +359,7 @@ void Event_PlayerHurt(Event event, const char[] name, bool dontBroadcast)
 
 void Event_Start(Event event, const char[] name, bool dontBroadcast)
 {
+	g_bAllowDance = false;
 	for (int i = 1; i <= MaxClients; i++)
             if (IsValidClient(i, false) && g_bClientDancing[i]) {
 				ResetCam(i);
@@ -366,8 +370,19 @@ void Event_Start(Event event, const char[] name, bool dontBroadcast)
 			}
 }
 
+void Event_End(Event event, const char[] name, bool dontBroadcast)
+{
+	g_bAllowDance = true;
+}
+
+
 public Action Command_Menu(int client, int args)
 {
+	if(!g_bAllowDance)
+	{
+		PrintToChat(client,"只有回合开始之前和结束之后才能跳舞！");
+		return Plugin_Handled;	
+	}
 	if (!IsValidClient(client))
 		return Plugin_Handled;
 

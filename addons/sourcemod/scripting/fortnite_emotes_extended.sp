@@ -448,7 +448,9 @@ Action CreateEmote(int client, const char[] anim1, const char[] anim2, const cha
 {
 	if (!IsValidClient(client))
 		return Plugin_Handled;
-	
+	if(!g_bAllowDance)
+		return Plugin_Handled;
+
 	if(g_EmoteForward_Pre != null)
 	{
 		Action res = Plugin_Continue;

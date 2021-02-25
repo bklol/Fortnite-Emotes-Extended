@@ -23,7 +23,7 @@
 #include <autoexecconfig>
 #undef REQUIRE_PLUGIN
 #include <adminmenu>
-#include <pugsetup>
+#include <c5_pug>
 
 #pragma newdecls required
 
@@ -304,12 +304,12 @@ public void OnMapStart()
 	PrecacheSound("*/kodua/fortnite_emotes/athena_emote_hot_music.wav");
 }
 
-public void PugSetup_OnLive()
+public void C5_PugSetup_OnLive()
 {
 	IsAllowCheck = true;
 }
 
-public void PugSetup_OnMatchOver(bool hasDemo, const char[] demoFileName)
+public void C5_PugSetup_OnMatchOver(bool hasDemo, const char[] demoFileName)
 {
 	IsAllowCheck = false;
 }
@@ -398,8 +398,8 @@ void Event_Start(Event event, const char[] name, bool dontBroadcast)
 			g_bAllowDance = false;
 			return;
 		}
-		
-		CreateTimer(freezetime,RestartCooldown,_,TIMER_FLAG_NO_MAPCHANGE);
+		else
+			CreateTimer(freezetime,RestartCooldown,_,TIMER_FLAG_NO_MAPCHANGE);
 	}
 }
 
@@ -425,7 +425,7 @@ public Action Command_Menu(int client, int args)
 {
 	if(!g_bAllowDance)
 	{
-		PrintToChat(client,"只有回合开始之前和结束之后才能跳舞！");
+		PrintToChat(client,"只有回合开始之前才能跳舞！");
 		return Plugin_Handled;	
 	}
 	if (!IsValidClient(client))
@@ -449,8 +449,10 @@ Action CreateEmote(int client, const char[] anim1, const char[] anim2, const cha
 	if (!IsValidClient(client))
 		return Plugin_Handled;
 	if(!g_bAllowDance)
+	{
+		PrintToChat(client,"只有回合开始之前才能跳舞！");
 		return Plugin_Handled;
-
+	}
 	if(g_EmoteForward_Pre != null)
 	{
 		Action res = Plugin_Continue;
